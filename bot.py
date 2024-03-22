@@ -95,31 +95,31 @@ class Bot(Client):
         pass
 
     @app.on_message(filters.group & ~filters.edited)
-async def group_message_handler(client, message):
-    # Extract the query from the incoming message
-    query = message.text.lower()  # Assuming the query is in the text of the message
-
-    # Retrieve the IMDb poster based on the query
-    poster_data = await get_poster(query)
-
-    # Create a button for initiating a private message
-    private_message_button = InlineKeyboardButton(
-        text="Send Message",
-        url=f"t.me/{client.username}?start=send_pm&query={query}"  # Modify this URL as needed
-    )
-
-    # Create an inline keyboard with the private message button
-    inline_keyboard = InlineKeyboardMarkup([[private_message_button]])
-
-    # Send the IMDb poster along with the inline keyboard as a reply to the group message
-    if poster_data:
-        await message.reply_photo(
-            photo=poster_data['poster'],
-            caption=f"IMDb Poster for '{query}':",
-            reply_markup=inline_keyboard
+    async def group_message_handler(client, message):
+        # Extract the query from the incoming message
+        query = message.text.lower()  # Assuming the query is in the text of the message
+    
+        # Retrieve the IMDb poster based on the query
+        poster_data = await get_poster(query)
+    
+        # Create a button for initiating a private message
+        private_message_button = InlineKeyboardButton(
+            text="Send Message",
+            url=f"t.me/{client.username}?start=send_pm&query={query}"  # Modify this URL as needed
         )
-    else:
-        await message.reply_text("Sorry, no IMDb poster found for that query.")
+    
+        # Create an inline keyboard with the private message button
+        inline_keyboard = InlineKeyboardMarkup([[private_message_button]])
+    
+        # Send the IMDb poster along with the inline keyboard as a reply to the group message
+        if poster_data:
+            await message.reply_photo(
+                photo=poster_data['poster'],
+                caption=f"IMDb Poster for '{query}':",
+                reply_markup=inline_keyboard
+            )
+        else:
+            await message.reply_text("Sorry, no IMDb poster found for that query.")
 
 
 app = Bot()
