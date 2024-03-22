@@ -12,8 +12,9 @@ from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, AUTH_CHANNEL
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from utils import temp, get_poster
+from typing import Union, Optional, AsyncGenerator
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 # Initialize Pyrogram client
 app = Client("my_bot")
@@ -99,7 +100,7 @@ class Bot(Client):
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="pm_request_cars")]])
             )
 
-    @app.on_message()
+    @app.on_message(filters.group & ~filters.edited)
     async def group_message_handler(self, message):
         # Extract the query from the incoming message
         query = message.text.lower()  # Assuming the query is in the text of the message
