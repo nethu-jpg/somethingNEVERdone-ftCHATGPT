@@ -42,6 +42,16 @@ class Bot(Client):
         self.username = '@' + me.username
         logging.info(f"{me.first_name} with for Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
+        
+    # Inside the method where the bot handles incoming messages from the group
+    async def handle_group_message(message):
+        if "cars" in message.text.lower():
+            # Fetch IMDb poster for "cars"
+            imdb_poster_url = fetch_imdb_poster("cars")
+            # Send IMDb poster and button
+            await bot.send_photo(chat_id=message.chat.id, photo=imdb_poster_url, caption="Click the button to continue.",
+                                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="pm_request_cars")]]))
+
 
     async def stop(self, *args):
         await super().stop()
