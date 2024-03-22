@@ -8,6 +8,7 @@ logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("cinemagoer").setLevel(logging.ERROR)
 
 from pyrogram import Client, __version__
+from pyrogram import filters
 from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
@@ -90,18 +91,11 @@ class Bot(Client):
                 current += 1
 
     async def handle_group_message(self, message):
-        if "cars" in message.text.lower():
-            # Fetch IMDb poster for "cars"
-            imdb_poster_url = await get_poster("cars")
-            # Send IMDb poster and button
-            await message.reply_photo(
-                photo=imdb_poster_url['poster'],
-                caption="Click the button to continue.",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="pm_request_cars")]])
-            )
+        # You can add your custom handling logic for group messages here
+        pass
 
-    @app.on_message(filters.group & ~filters.edited)
-    async def group_message_handler(self, message):
+    @app.on_message()
+    async def all_messages_handler(self, message):
         # Extract the query from the incoming message
         query = message.text.lower()  # Assuming the query is in the text of the message
     
