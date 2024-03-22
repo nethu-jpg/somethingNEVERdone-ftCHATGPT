@@ -15,6 +15,12 @@ from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, AUTH_CHANNEL
 from utils import temp
 from typing import Union, Optional, AsyncGenerator
 from pyrogram import types
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from utils import get_poster
+
+# Initialize Pyrogram client
+app = Client("my_bot")
 
 class Bot(Client):
 
@@ -95,6 +101,35 @@ class Bot(Client):
             for message in messages:
                 yield message
                 current += 1
+
+    # Modify the message handler to respond to all incoming messages in the group
+    @app.on_message(filters.group & ~filters.edited)
+    async def group_message_handler(client, message):
+        # Extract the query from the incoming message
+        query = message.text.lower()  # Assuming the query is in the text of the message
+    
+        # Retrieve the IMDb poster based on the query
+        poster_data = await get_poster(query)
+    
+        # Create a button for initiating a private message
+        private_message_button = InlineKeyboardButton(
+            text="Send Message",
+            url=f"t.me/{app.username}?start=send_pm&query={query}"  # Modify this URL as needed
+        )
+    
+        # Create an inline keyboard with the private message button
+        inline_keyboard = InlineKeyboardMarkup([[private_message_button]])
+    
+        # Send the IMDb poster along with the inline keyboard as a reply to the group message
+        if poster_data:
+            await message.reply_photo(
+                photo=poster_data['poster'],
+                caption=f"IMDb Poster for '{query}':",
+                reply_markup=inline_keyboard
+            )
+        else:
+            await message.reply_text("Sorry, no IMDb poster found for that query.")
+
 
 
 app = Bot()
