@@ -12,12 +12,7 @@ from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, AUTH_CHANNEL
-from utils import temp
-from typing import Union, Optional, AsyncGenerator
-from pyrogram import types
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from utils import get_poster
+from utils import temp, get_poster
 
 # Initialize Pyrogram client
 app = Client("my_bot")
@@ -48,21 +43,11 @@ class Bot(Client):
         self.username = '@' + me.username
         logging.info(f"{me.first_name} with for Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
-        
-    # Inside the method where the bot handles incoming messages from the group
-    async def handle_group_message(message):
-        if "cars" in message.text.lower():
-            # Fetch IMDb poster for "cars"
-            imdb_poster_url = fetch_imdb_poster("cars")
-            # Send IMDb poster and button
-            await bot.send_photo(chat_id=message.chat.id, photo=imdb_poster_url, caption="Click the button to continue.",
-                                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="pm_request_cars")]]))
-
 
     async def stop(self, *args):
         await super().stop()
         logging.info("Bot stopped. Bye.")
-    
+
     async def iter_messages(
         self,
         chat_id: Union[int, str],
@@ -102,9 +87,19 @@ class Bot(Client):
                 yield message
                 current += 1
 
-    # Modify the message handler to respond to all incoming messages in the group
+    async def handle_group_message(self, message):
+        if "cars" in message.text.lower():
+            # Fetch IMDb poster for "cars"
+            imdb_poster_url = await get_poster("cars")
+            # Send IMDb poster and button
+            await message.reply_photo(
+                photo=imdb_poster_url['poster'],
+                caption="Click the button to continue.",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Continue", callback_data="pm_request_cars")]])
+            )
+
     @app.on_message(filters.group & ~filters.edited)
-    async def group_message_handler(client, message):
+    async def group_message_handler(self, message):
         # Extract the query from the incoming message
         query = message.text.lower()  # Assuming the query is in the text of the message
     
@@ -114,7 +109,7 @@ class Bot(Client):
         # Create a button for initiating a private message
         private_message_button = InlineKeyboardButton(
             text="Send Message",
-            url=f"t.me/{app.username}?start=send_pm&query={query}"  # Modify this URL as needed
+            url=f"t.me/{self.username}?start=send_pm&query={query}"  # Modify this URL as needed
         )
     
         # Create an inline keyboard with the private message button
@@ -129,8 +124,6 @@ class Bot(Client):
             )
         else:
             await message.reply_text("Sorry, no IMDb poster found for that query.")
-
-
 
 app = Bot()
 app.run()
