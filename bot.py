@@ -94,8 +94,8 @@ class Bot(Client):
         # You can add your custom handling logic for group messages here
         pass
 
-    @app.on_message(filters.group & ~filters.edited)
-    async def group_message_handler(client, message):
+    @app.on_message(filters.group)
+    async def group_message_handler(message):
         # Extract the query from the incoming message
         query = message.text.lower()  # Assuming the query is in the text of the message
     
@@ -105,7 +105,7 @@ class Bot(Client):
         # Create a button for initiating a private message
         private_message_button = InlineKeyboardButton(
             text="Send Message",
-            url=f"t.me/{client.username}?start=send_pm&query={query}"  # Modify this URL as needed
+            url=f"https://t.me/MoviesINF_bot?start=send_pm&query={query}"  # Replace BOT_USERNAME with your bot's username
         )
     
         # Create an inline keyboard with the private message button
@@ -120,7 +120,6 @@ class Bot(Client):
             )
         else:
             await message.reply_text("Sorry, no IMDb poster found for that query.")
-
 
 app = Bot()
 app.run()
